@@ -49,22 +49,17 @@ check_missing_packages () {
 
   function version { echo "$@" | awk -F. '{ printf("%d%03d%03d%03d\n", $1,$2,$3,$4); }'; }
 
-  if [[ $(version $version_have)  < $(version '2.8.10') ]]; then
-    echo "your cmake version is too old $version_have wanted 2.8.10"
-    exit 1
-  fi
-
   if [[ ! -f /usr/include/zlib.h ]]; then
     echo "warning: you may need to install zlib development headers first if you want to build mp4box [on ubuntu: $ apt-get install zlib1g-dev]" # XXX do like configure does and attempt to compile and include zlib.h instead?
     sleep 1
   fi
 
-  out=`yasm --version`
-  yasm_version=`echo "$out" | cut -d " " -f 2` # like 1.1.0.112
-  if [[ $(version $yasm_version)  < $(version '1.2.0') ]]; then
-    echo "your yasm version is too old $yasm_version wanted 1.2.0"
-    exit 1
-  fi
+#  out=`yasm --version`
+#  yasm_version=`echo "$out" | cut -d " " -f 2` # like 1.1.0.112
+#  if [[ $(version $yasm_version)  < $(version '1.2.0') ]]; then
+#    echo "your yasm version is too old $yasm_version wanted 1.2.0"
+#    exit 1
+#  fi
 
 }
 
@@ -1131,7 +1126,8 @@ build_ffmpeg() {
   local output_dir="ffmpeg_git"
 
   # FFmpeg + libav compatible options
-  local extra_configure_opts="--enable-libsoxr --enable-fontconfig --enable-libass --enable-libutvideo --enable-libbluray --enable-iconv --enable-libtwolame --extra-cflags=-DLIBTWOLAME_STATIC --enable-libzvbi --enable-libcaca --enable-libmodplug --extra-libs=-lstdc++ --extra-libs=-lpng --enable-libvidstab --enable-libx265 --enable-decklink --extra-libs=-loleaut32"
+  #local extra_configure_opts="--enable-libsoxr --enable-fontconfig --enable-libass --enable-libutvideo --enable-libbluray --enable-iconv --enable-libtwolame --extra-cflags=-DLIBTWOLAME_STATIC --enable-libzvbi --enable-libcaca --enable-libmodplug --extra-libs=-lstdc++ --extra-libs=-lpng --enable-libvidstab --enable-libx265 --enable-decklink --extra-libs=-loleaut32"
+  local extra_configure_opts=""
 
   if [[ $type = "libav" ]]; then
     # libav [ffmpeg fork]  has a few missing options?
@@ -1146,7 +1142,7 @@ build_ffmpeg() {
   # can't mix and match --enable-static --enable-shared unfortunately, or the final executable seems to just use shared if the're both present
   if [[ $shared == "shared" ]]; then
     output_dir=${output_dir}_shared
-    do_git_checkout $git_url ${output_dir}
+    do_git_checkout $git_url ${output_dir} n2.5.3
     final_install_dir=`pwd`/${output_dir}.installed
     extra_configure_opts="--enable-shared --disable-static $extra_configure_opts"
     # avoid installing this to system?
@@ -1165,7 +1161,8 @@ build_ffmpeg() {
 
 # add --extra-cflags=$CFLAGS, though redundant, just so that FFmpeg lists what it used in its "info" output
 
-  config_options="--arch=$arch --target-os=mingw32 --cross-prefix=$cross_prefix --pkg-config=pkg-config --enable-gpl --enable-libx264 --enable-avisynth --enable-libxvid --enable-libmp3lame --enable-version3 --enable-zlib --enable-librtmp --enable-libvorbis --enable-libtheora --enable-libspeex --enable-libopenjpeg --enable-gnutls --enable-libgsm --enable-libfreetype --enable-libopus --disable-w32threads --enable-frei0r --enable-filter=frei0r --enable-libvo-aacenc --enable-bzlib --enable-libxavs --extra-cflags=-DPTW32_STATIC_LIB --enable-libopencore-amrnb --enable-libopencore-amrwb --enable-libvo-amrwbenc --enable-libschroedinger --enable-libvpx --enable-libilbc --prefix=$mingw_w64_x86_64_prefix $extra_configure_opts --extra-cflags=$CFLAGS" # other possibilities: --enable-w32threads --enable-libflite
+  #config_options="--arch=$arch --target-os=mingw32 --cross-prefix=$cross_prefix --pkg-config=pkg-config --enable-gpl --enable-libx264 --enable-avisynth --enable-libxvid --enable-libmp3lame --enable-version3 --enable-zlib --enable-librtmp --enable-libvorbis --enable-libtheora --enable-libspeex --enable-libopenjpeg --enable-gnutls --enable-libgsm --enable-libfreetype --enable-libopus --disable-w32threads --enable-frei0r --enable-filter=frei0r --enable-libvo-aacenc --enable-bzlib --enable-libxavs --extra-cflags=-DPTW32_STATIC_LIB --enable-libopencore-amrnb --enable-libopencore-amrwb --enable-libvo-amrwbenc --enable-libschroedinger --enable-libvpx --enable-libilbc --prefix=$mingw_w64_x86_64_prefix $extra_configure_opts --extra-cflags=$CFLAGS" # other possibilities: --enable-w32threads --enable-libflite
+  config_options="--arch=$arch --target-os=mingw32 --cross-prefix=$cross_prefix --pkg-config=pkg-config --enable-libvorbis --disable-w32threads --enable-libvpx --prefix=$mingw_w64_x86_64_prefix $extra_configure_opts --extra-cflags=$CFLAGS" # other possibilities: --enable-w32threads --enable-libflite
   if [[ "$non_free" = "y" ]]; then
     config_options="$config_options --enable-nonfree --enable-libfdk-aac --disable-libfaac --disable-decoder=aac" # To use fdk-aac in VLC, we need to change FFMPEG's default (faac), but I haven't found how to do that... So I disabled it. This could be an new option for the script? -- faac deemed too poor quality and becomes the default -- add it in and uncomment the build_faac line to include it 
     # other possible options: --enable-openssl --enable-libaacplus
@@ -1212,61 +1209,61 @@ find_all_build_exes() {
 
 build_dependencies() {
   echo "PKG_CONFIG_PATH=$PKG_CONFIG_PATH" # debug
-  #build_win32_pthreads # vpx etc. depend on this--provided by the compiler build script now, so shouldn't have to build our own
-  build_libdlfcn # ffmpeg's frei0r implentation needs this <sigh>
-  build_zlib # rtmp depends on it [as well as ffmpeg's optional but handy --enable-zlib]
-  build_bzlib2 # in case someone wants it [ffmpeg uses it]
-  build_libpng # for openjpeg, needs zlib
-  build_gmp # for libnettle
-  build_libnettle # needs gmp
-  build_iconv # mplayer I think needs it for freetype [just it though], vlc also wants it.  looks like ffmpeg can use it too...not sure what for :)
-  build_gnutls # needs libnettle, can use iconv it appears
+  ##build_win32_pthreads # vpx etc. depend on this--provided by the compiler build script now, so shouldn't have to build our own
+  #build_libdlfcn # ffmpeg's frei0r implentation needs this <sigh>
+  #build_zlib # rtmp depends on it [as well as ffmpeg's optional but handy --enable-zlib]
+  #build_bzlib2 # in case someone wants it [ffmpeg uses it]
+  #build_libpng # for openjpeg, needs zlib
+  #build_gmp # for libnettle
+  #build_libnettle # needs gmp
+  #build_iconv # mplayer I think needs it for freetype [just it though], vlc also wants it.  looks like ffmpeg can use it too...not sure what for :)
+  #build_gnutls # needs libnettle, can use iconv it appears
 
-  build_frei0r
-  build_libutvideo
-  #build_libflite # too big for the ffmpeg distro...
-  build_libgsm
-  build_sdl # needed for ffplay to be created
-  build_libopus
-  build_libopencore
+  #build_frei0r
+  #build_libutvideo
+  ##build_libflite # too big for the ffmpeg distro...
+  #build_libgsm
+  #build_sdl # needed for ffplay to be created
+  #build_libopus
+  #build_libopencore
   build_libogg
-  
-  build_libspeex # needs libogg for exe's
+  #
+  #build_libspeex # needs libogg for exe's
   build_libvorbis # needs libogg
-  build_libtheora # needs libvorbis, libogg
-  build_orc
-  build_libschroedinger # needs orc
-  build_freetype # uses bz2/zlib seemingly
-  build_libexpat
-  build_libxml2
-  build_libbluray # needs libxml2, freetype [FFmpeg, VLC use this, at least]
-  build_libjpeg_turbo # mplayer can use this, VLC qt might need it? [replaces libjpeg]
-  build_libxvid
-  build_libxavs
-  build_libsoxr
-  build_libx264
-  build_libx265
-  build_lame
-  build_twolame
-  build_vidstab
-  build_libcaca
-  build_libmodplug # ffmepg and vlc can use this
-  build_zvbi
+  #build_libtheora # needs libvorbis, libogg
+  #build_orc
+  #build_libschroedinger # needs orc
+  #build_freetype # uses bz2/zlib seemingly
+  #build_libexpat
+  #build_libxml2
+  #build_libbluray # needs libxml2, freetype [FFmpeg, VLC use this, at least]
+  #build_libjpeg_turbo # mplayer can use this, VLC qt might need it? [replaces libjpeg]
+  #build_libxvid
+  #build_libxavs
+  #build_libsoxr
+  #build_libx264
+  #build_libx265
+  #build_lame
+  #build_twolame
+  #build_vidstab
+  #build_libcaca
+  #build_libmodplug # ffmepg and vlc can use this
+  #build_zvbi
   build_libvpx
-  build_vo_aacenc
-  build_libdecklink
-  build_libilbc
-  build_fontconfig # needs expat, needs freetype (at least uses it if available), can use iconv, but I believe doesn't currently
-  build_libfribidi
-  build_libass # needs freetype, needs fribidi, needs fontconfig
-  build_libopenjpeg
+  #build_vo_aacenc
+  #build_libdecklink
+  #build_libilbc
+  #build_fontconfig # needs expat, needs freetype (at least uses it if available), can use iconv, but I believe doesn't currently
+  #build_libfribidi
+  #build_libass # needs freetype, needs fribidi, needs fontconfig
+  #build_libopenjpeg
   if [[ "$non_free" = "y" ]]; then
     build_fdk_aac
     # build_faac # not included for now, too poor quality output :)
     # build_libaacplus # if you use it, conflicts with other AAC encoders <sigh>, so disabled :)
   fi
   # build_openssl # hopefully do not need it anymore, since we use gnutls everywhere, so just don't even build it anymore...
-  build_librtmp # needs gnutls [or openssl...]
+  #build_librtmp # needs gnutls [or openssl...]
 }
 
 build_apps() {
