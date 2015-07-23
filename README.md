@@ -6,7 +6,7 @@ including many dependency libraries they use.
 
 To run the script:
 
-In some type of Linux box (VM or native, or you can create a remote one temporarily, like at digitalocean, use it, then destroy it):
+In some type of Linux box (VM or native, or you can create a remote one temporarily, like at digitalocean [1], use it, then destroy it):
 
 download the script (git clone the repo, run it, or do the following in a bash window) $
 
@@ -57,16 +57,16 @@ Feedback welcome roger-projects@googlegroups.com
 
 Related projects (similar to this one...):
 
-vlc has its "contribs" building (cross compiling) system: https://wiki.videolan.org/Win32Compile/
-
-mxe "m cross environment" https://github.com/mxe/mxe is for cross compiling many things.
-
-https://github.com/qyot27/mpv/blob/extra-new/DOCS/crosscompile-mingw-tedious.txt lists lots of howto's
-
-For building FFmpeg (for windows) in a more native windows environment these might help (though it might be slower as well unless):
-
-https://github.com/jb-alvarado/media-autobuild_suite(msys2)
-https://github.com/Warblefly/multimediaWin64 (cygwin)
+https://github.com/jb-alvarado/media-autobuild_suite (native'ish windows using msys2)
+https://github.com/Warblefly/multimediaWin64 (native'ish windows using cygwin)
 
 ping me if you want this script ported to more native as well :)
 
+vlc has a "contribs" building (cross compiling) system for its dependencies: https://wiki.videolan.org/Win32Compile/
+
+mxe "m cross environment" https://github.com/mxe/mxe is a library for cross compiling many things.
+
+https://github.com/qyot27/mpv/blob/extra-new/DOCS/crosscompile-mingw-tedious.txt lists lots of instructions
+
+[1] if you use a 512MB RAM droplet, make sure to add some extra swap space: https://www.digitalocean.com/community/tutorials/how-to-add-swap-on-ubuntu-14-04 before starting.  
+Here's my digitalocean referral link in case you want it [$10 credit] https://www.digitalocean.com/?refcode=b3030b559d17

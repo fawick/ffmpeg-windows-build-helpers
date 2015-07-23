@@ -1,39 +1,34 @@
 == actual todos ==
 
-test out mplayer with its record-size stuff...
+test out mplayer with its record-size whatever...
+
+== maybe/never do, more on the never... ==
+
+fix gsm shared is broken
+
+default to more gcc cpu's?  hrm...
+
+opencl support [copy in headers?] https://www.khronos.org/registry/cl/ it needs something to link against too...ai ai
 
 figure out real static linkable builds [tell zeranoe to put them on his site?]
   linkable against them with mingw, msvc...
 
-== maybe/never do, more on the never ==
-
-libav.pc is missing myriad things [patches to core?]
+libav.pc is missing myriad things [patches to ffmpeg-core?]
   then use it in x264 LOL wait isn't that circular...ok maybe this is low prio
-
-vlc build broken :|
 
 windows cygwin batch file to build the whole thing?
   can I do this all with that zeranoe .bat file and cygwin deps? LOL
 
-add more executables like the jb-alvarado one has [?]
+add more executables like the jb-alvarado one [?] meh
 
-not use the "default lib" directory I guess, if that enables us to build versions for linux instead, easily, and as well [except nobody has even once requested that...?]?
+not use the "default lib" directory I guess, if that enables us to build versions for linux instead, easily, and as well...except shouldn't they use their own dep system? I guess it might still be convenient...awaiting more demand...
 
 auto detect new release versions of dependencies [that are active LOL]
 
-vlc tell them they don't do make parallel right for doze...if I can ever repro it...
-
 mplayer use svn trunk?
-
-vlc use git master?
-
 
 final install of ffmpeg static to some folder etc. [?] yeah why not...
   and .exe distro LOL
-
-vlc build is dead with his pthreads? mine?
-  I prefer his anyway if that way does work better...how can I have mine here tho?
-  SHARED was hiding the linnnnnk error far far away...and also not even needing it...but should have failed on dll...unless I never used it!
 
 real distro/installer/put it online
   release "debug" builds, full static linkable builds [?]
@@ -57,8 +52,6 @@ clean sandbox build all with libfdk [i.e. can it still build everything everythi
 
 march without runtime cpu with hard core 1GB y4m fprofiled x264 and amd/intel cpu specified...LOLyeah...ask sherpya if he gets any speedups.
 
-complain to vlc you can't build multi thread make :P
-
 tell mingw-w64 that they should support VARIANT
 
 use libcaca git instead, tell them it still isn't enough...
@@ -67,9 +60,6 @@ test all things dvd to make sure they play anything...
 
 mplayer git'ify'
   blocked'ish by lack of easy access to their source
-
-vlc git'ify
-  hopefully no longer blocked, but I'm not pointed at mainline yet... :P
 
 -d should auto select "both 32 and 64 bit" [XXX make it into command line param too?]
 
